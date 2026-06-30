@@ -1,5 +1,5 @@
 # Promoting and passing
-
+# run in terminal = python ex14.py any add it
 from sys import argv
 script,user_name = argv
 prompt = ' > '
