@@ -1,0 +1,132 @@
+# basic object-oriented analysis and design
+# sikhata hai ki program likhne se pehle uska design banao—objects, attributes, methods aur relationships ko identify karo. Yehi Object-Oriented Analysis and Design (OOAD) hai.
+
+from sys import exit
+from random import randint
+from dialogue import DIALOGUE
+# 1 make sckeletane
+class Scene(object):
+    def enter(self):
+        print("This scene is not yet configured.")
+        print("Subclass it and implement enter().")
+        exit(1)
+
+class Engine(object):
+    def __init__(self,scene_map):
+        self.scene_map = scene_map
+    def play(self):
+     currant_scene = self.scene_map.opening_scene()
+
+     while True:
+        next_scene_name = currant_scene.enter()
+
+        if next_scene_name == 'finished':
+            break
+
+        currant_scene = self.scene_map.next_scene(next_scene_name)
+
+    currant_scene.enter()
+ 
+
+class Death(Scene):
+        quips = [
+            "You died. You kinda suck at this.",
+            "your Mom would be proud...if she were smarter.",
+            "Such a luser.",
+            "I have a small puppy that's better at this.",
+            "You're worse than your Dad's jokes."
+           ]
+        def enter(self):
+          print(Death.quips[randint(0, len(self.quips)-1)])
+          exit(1)
+
+class CentralCorridor(Scene):
+    def enter(self):
+        print(DIALOGUE["CentralCorridor_enter"])
+        action = input("> ")
+        if action == "shoot!":
+            print(DIALOGUE["CentralCorridor_shoot"])
+            return 'death'
+        elif action == "dodge!":
+            print(DIALOGUE["CentralCorridor_dodge"])
+            return 'death'
+        elif action == "tell a joke":
+            print(DIALOGUE["CentralCorridor_joke"])
+            return 'laser_weapon_armory'
+        else:
+            print("DOES NOT COMPUTE!")
+            return 'central_corridor'
+class LaserWeaponArmory(Scene):
+    def enter(self):
+        print(DIALOGUE["LaserWeaponArmory_enter"])
+
+        code = f"{randint(0,9)}{randint(0,9)}{randint(0,9)}"
+        guess = input("[keypad>] ")
+
+        guesses = 0
+
+        while guess != code and guesses < 10:
+            print("BZZZZEDDD!")
+            guesses += 1
+            guess = input("[keypad]> ")
+
+        if guess == code:
+            print(DIALOGUE['LaserWeaponArmory_guess'])
+            return 'the_bridge'
+        else:
+            print(DIALOGUE["LaserWeaponArmory_fail"])
+            return 'death'
+class TheBridge(Scene):
+    def enter(self):
+        print(DIALOGUE["TheBridge_enter"])
+        action = input("> ")
+        if action == "throw the bomb":
+            print(DIALOGUE['heBridge_throw_bomb'])
+            return 'death'
+        elif action == "slowly place the bomb":
+            print(DIALOGUE["TheBridge_place_bomb"])
+            return 'escape_pod'
+        else:
+            print("DOES NOT COMPUTE!")
+            return "the_bridge"
+
+class EscapePod(Scene):
+    def enter(self):
+        print(DIALOGUE["EscapePod_enter"])
+
+        good_pod = randint(1, 5)
+        guess = int(input("[pod #]> "))
+
+        if guess != good_pod:
+            print(DIALOGUE["EscapePod_death"].format(guess=guess))
+            return 'death'
+        else:
+            print("You escaped!")
+            return 'finished'
+        
+class Finished(Scene):
+    def enter(self):
+        print("You won! Good job.")
+        return 'finished' 
+
+
+class Map(object):
+    scenes = {
+        'central_corridor' : CentralCorridor(),
+        'laser_weapon_armory': LaserWeaponArmory(),
+        'the_bridge': TheBridge(),
+        'escape_pod': EscapePod(),
+        'death': Death(),
+        'finished': Finished(),
+    }
+    def __init__(self, start_scene):
+        self.start_scene  =start_scene
+    def next_scene(self, scene_name):
+        val = Map.scenes.get(scene_name)
+        return val
+    def opening_scene(self):
+        return self.next_scene(self.start_scene)
+
+a_map = Map('central_corridor')
+a_game = Engine(a_map)
+a_game.play()
